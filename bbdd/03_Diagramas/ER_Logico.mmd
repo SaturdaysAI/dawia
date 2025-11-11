@@ -1,0 +1,143 @@
+erDiagram
+    %% Diagrama ER Lógico - Con tipos de datos, claves y constraints detallados
+    
+    AUTORES {
+        INT autor_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        VARCHAR(50) nacionalidad "NULL"
+        DATE fecha_nacimiento "NULL"
+    }
+    
+    EDITORIALES {
+        INT editorial_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL, UNIQUE"
+        VARCHAR(50) pais "NULL"
+        TIMESTAMP fecha_registro "DEFAULT CURRENT_TIMESTAMP"
+    }
+    
+    GENEROS {
+        INT genero_id PK "AUTO_INCREMENT"
+        VARCHAR(50) nombre "NOT NULL, UNIQUE"
+        TEXT descripcion "NULL"
+    }
+    
+    LIBROS {
+        VARCHAR(20) isbn PK "NOT NULL, UNIQUE"
+        VARCHAR(200) titulo "NOT NULL"
+        INT editorial_id FK "NOT NULL"
+        INT genero_id FK "NOT NULL"
+        INT anio_publicacion "NULL, CHECK >= 1000"
+        INT stock_total "NOT NULL, DEFAULT 1, CHECK >= 0"
+        INT stock_disponible "NOT NULL, DEFAULT 1, CHECK >= 0"
+        ENUM estado "NOT NULL, DEFAULT 'Disponible'"
+    }
+    
+    LIBRO_AUTOR {
+        VARCHAR(20) isbn PK,FK "NOT NULL"
+        INT autor_id PK,FK "NOT NULL"
+    }
+    
+    SOCIOS {
+        INT socio_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        VARCHAR(100) email "NOT NULL, UNIQUE"
+        VARCHAR(20) telefono "NULL"
+        DATE fecha_registro "NOT NULL, DEFAULT CURRENT_DATE"
+        ENUM estado "NOT NULL, DEFAULT 'Activo'"
+        DECIMAL(10,2) multa_acumulada "NOT NULL, DEFAULT 0.00, CHECK >= 0"
+    }
+    
+    PERSONAL {
+        INT personal_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        ENUM rol "NOT NULL"
+        VARCHAR(100) email "NOT NULL, UNIQUE"
+        DATE fecha_contratacion "NOT NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Activo'"
+    }
+    
+    PRESTAMOS {
+        INT prestamo_id PK "AUTO_INCREMENT"
+        INT socio_id FK "NOT NULL"
+        VARCHAR(20) isbn FK "NOT NULL"
+        INT personal_id FK "NOT NULL"
+        DATE fecha_prestamo "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_devolucion "NOT NULL"
+        DATE fecha_devolucion_real "NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Activo'"
+    }
+    
+    RESERVAS {
+        INT reserva_id PK "AUTO_INCREMENT"
+        INT socio_id FK "NOT NULL"
+        VARCHAR(20) isbn FK "NOT NULL"
+        DATE fecha_reserva "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_caducidad "NOT NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Pendiente'"
+    }
+    
+    MULTAS {
+        INT multa_id PK "AUTO_INCREMENT"
+        INT prestamo_id FK "NOT NULL, UNIQUE"
+        DECIMAL(10,2) importe "NOT NULL, CHECK >= 0 AND <= 30.00"
+        DATE fecha_generacion "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_pago "NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Pendiente'"
+    }
+    
+    %% Relaciones con cardinalidades específicas
+    EDITORIALES ||--o{ LIBROS : "publica (1:N)"
+    GENEROS ||--o{ LIBROS : "clasifica (1:N)"
+    LIBROS }o--o{ AUTORES : "escrito_por (N:M) via LIBRO_AUTOR"
+    SOCIOS }o--o{ LIBROS : "pide_prestado (N:M) via PRESTAMOS"
+    PERSONAL }o--o{ LIBROS : "gestiona_prestamos (N:M) via PRESTAMOS"
+    SOCIOS }o--o{ LIBROS : "reserva (N:M) via RESERVAS"
+    PRESTAMOS ||--o| MULTAS : "genera (1:0..1)"
+```
+
+**Figura 2: Diagrama ER Lógico - Sistema de Gestión de Biblioteca**
+
+*Este diagrama muestra las entidades con sus atributos, tipos de datos, claves primarias (PK), claves foráneas (FK), constraints (NOT NULL, UNIQUE, CHECK, DEFAULT) y las relaciones con cardinalidades específicas. Incluye la tabla intermedia LIBRO_AUTOR para la relación muchos a muchos.*
+
+### Detalles de Constraints:
+
+**Claves Primarias (PK):**
+- `AUTORES.autor_id`, `EDITORIALES.editorial_id`, `GENEROS.genero_id`: AUTO_INCREMENT
+- `LIBROS.isbn`: VARCHAR(20) con validación de formato ISBN
+- `SOCIOS.socio_id`, `PERSONAL.personal_id`, `PRESTAMOS.prestamo_id`, `RESERVAS.reserva_id`, `MULTAS.multa_id`: AUTO_INCREMENT
+- `LIBRO_AUTOR`: Clave primaria compuesta (isbn, autor_id)
+
+**Claves Foráneas (FK):**
+- `LIBROS.editorial_id` → `EDITORIALES.editorial_id`
+- `LIBROS.genero_id` → `GENEROS.genero_id`
+- `LIBRO_AUTOR.isbn` → `LIBROS.isbn`
+- `LIBRO_AUTOR.autor_id` → `AUTORES.autor_id`
+- `PRESTAMOS.socio_id` → `SOCIOS.socio_id`
+- `PRESTAMOS.isbn` → `LIBROS.isbn`
+- `PRESTAMOS.personal_id` → `PERSONAL.personal_id`
+- `RESERVAS.socio_id` → `SOCIOS.socio_id`
+- `RESERVAS.isbn` → `LIBROS.isbn`
+- `MULTAS.prestamo_id` → `PRESTAMOS.prestamo_id`
+
+**Constraints CHECK:**
+- `LIBROS.anio_publicacion >= 1000 AND <= YEAR(CURDATE())`
+- `LIBROS.stock_total >= 0`, `LIBROS.stock_disponible >= 0`
+- `SOCIOS.multa_acumulada >= 0`
+- `MULTAS.importe >= 0 AND <= 30.00` (máximo 30€ por préstamo)
+
+**Valores DEFAULT:**
+- `EDITORIALES.fecha_registro`: CURRENT_TIMESTAMP
+- `LIBROS.stock_total`, `LIBROS.stock_disponible`: 1
+- `LIBROS.estado`: 'Disponible'
+- `SOCIOS.fecha_registro`: CURRENT_DATE
+- `SOCIOS.estado`: 'Activo'
+- `SOCIOS.multa_acumulada`: 0.00
+- `PRESTAMOS.fecha_prestamo`: CURRENT_DATE
+- `PRESTAMOS.estado`: 'Activo'
+- `RESERVAS.fecha_reserva`: CURRENT_DATE
+- `RESERVAS.estado`: 'Pendiente'
+- `MULTAS.fecha_generacion`: CURRENT_DATE
+- `MULTAS.estado`: 'Pendiente'

@@ -1,0 +1,236 @@
+graph TB
+    %% Diagrama de Casos de Uso - Sistema de Gestión de Biblioteca
+    
+    %% Actores del sistema
+    actor Socio as "Socio"
+    actor Bibliotecario as "Bibliotecario"
+    actor Administrador as "Administrador"
+    
+    %% Sistema de Gestión de Biblioteca
+    rectangle "Sistema de Gestión de Biblioteca" as Sistema {
+        
+        %% Gestión de Libros (RF-01 a RF-05)
+        usecase "UC01: Registrar Libro" as UC01
+        usecase "UC02: Modificar Libro" as UC02
+        usecase "UC03: Eliminar Libro" as UC03
+        usecase "UC04: Consultar Disponibilidad" as UC04
+        usecase "UC05: Búsqueda Avanzada de Libros" as UC05
+        
+        %% Gestión de Socios (RF-06 a RF-10)
+        usecase "UC06: Registrar Socio" as UC06
+        usecase "UC07: Actualizar Socio" as UC07
+        usecase "UC08: Eliminar Socio" as UC08
+        usecase "UC09: Consultar Historial de Préstamos" as UC09
+        usecase "UC10: Gestionar Estado de Membresía" as UC10
+        
+        %% Sistema de Préstamos (RF-11 a RF-15)
+        usecase "UC11: Registrar Préstamo" as UC11
+        usecase "UC12: Registrar Devolución" as UC12
+        usecase "UC13: Controlar Límite de Préstamos" as UC13
+        usecase "UC14: Validar Disponibilidad" as UC14
+        usecase "UC15: Renovar Préstamo" as UC15
+        
+        %% Sistema de Reservas (RF-16 a RF-19)
+        usecase "UC16: Reservar Libro" as UC16
+        usecase "UC17: Gestionar Lista de Espera" as UC17
+        usecase "UC18: Notificar Disponibilidad" as UC18
+        usecase "UC19: Cancelar Reserva" as UC19
+        
+        %% Control de Multas (RF-20 a RF-23)
+        usecase "UC20: Calcular Multas Automáticamente" as UC20
+        usecase "UC21: Registrar Pago de Multa" as UC21
+        usecase "UC22: Bloquear Préstamos por Multas" as UC22
+        usecase "UC23: Generar Reporte de Multas" as UC23
+        
+        %% Reportes y Estadísticas (RF-24 a RF-28)
+        usecase "UC24: Reporte Libros Más Prestados" as UC24
+        usecase "UC25: Reporte Socios Más Activos" as UC25
+        usecase "UC26: Reporte Tasa de Ocupación por Género" as UC26
+        usecase "UC27: Reporte Ingresos por Multas" as UC27
+        usecase "UC28: Reporte Inventario Completo" as UC28
+        
+        %% Gestión de Personal
+        usecase "UC29: Gestionar Personal Bibliotecario" as UC29
+        
+        %% Mantenimiento del Sistema
+        usecase "UC30: Realizar Backup del Sistema" as UC30
+        usecase "UC31: Restaurar Backup" as UC31
+    }
+    
+    %% Relaciones de Actores con Casos de Uso
+    
+    %% Socio - Solo puede realizar operaciones de consulta y reserva
+    Socio --> UC04
+    Socio --> UC05
+    Socio --> UC09
+    Socio --> UC16
+    Socio --> UC19
+    
+    %% Bibliotecario - Puede realizar operaciones diarias de gestión
+    Bibliotecario --> UC04
+    Bibliotecario --> UC05
+    Bibliotecario --> UC11
+    Bibliotecario --> UC12
+    Bibliotecario --> UC15
+    Bibliotecario --> UC16
+    Bibliotecario --> UC17
+    Bibliotecario --> UC19
+    Bibliotecario --> UC21
+    Bibliotecario --> UC24
+    Bibliotecario --> UC25
+    
+    %% Administrador - Tiene acceso completo a todas las funcionalidades
+    Administrador --> UC01
+    Administrador --> UC02
+    Administrador --> UC03
+    Administrador --> UC04
+    Administrador --> UC05
+    Administrador --> UC06
+    Administrador --> UC07
+    Administrador --> UC08
+    Administrador --> UC09
+    Administrador --> UC10
+    Administrador --> UC11
+    Administrador --> UC12
+    Administrador --> UC13
+    Administrador --> UC14
+    Administrador --> UC15
+    Administrador --> UC16
+    Administrador --> UC17
+    Administrador --> UC18
+    Administrador --> UC19
+    Administrador --> UC20
+    Administrador --> UC21
+    Administrador --> UC22
+    Administrador --> UC23
+    Administrador --> UC24
+    Administrador --> UC25
+    Administrador --> UC26
+    Administrador --> UC27
+    Administrador --> UC28
+    Administrador --> UC29
+    Administrador --> UC30
+    Administrador --> UC31
+    
+    %% Relaciones entre casos de uso (Include)
+    UC11 ..> UC14 : <<include>>
+    UC11 ..> UC13 : <<include>>
+    UC11 ..> UC22 : <<include>>
+    UC12 ..> UC20 : <<include>>
+    UC16 ..> UC04 : <<include>>
+    UC17 ..> UC18 : <<include>>
+    
+    %% Relaciones entre casos de uso (Extend)
+    UC15 ..> UC14 : <<extend>>
+    UC19 ..> UC17 : <<extend>>
+    
+    %% Agrupación por funcionalidades
+    subgraph "Gestión de Catálogo"
+        UC01
+        UC02
+        UC03
+        UC04
+        UC05
+    end
+    
+    subgraph "Gestión de Socios"
+        UC06
+        UC07
+        UC08
+        UC09
+        UC10
+    end
+    
+    subgraph "Préstamos y Devoluciones"
+        UC11
+        UC12
+        UC13
+        UC14
+        UC15
+    end
+    
+    subgraph "Sistema de Reservas"
+        UC16
+        UC17
+        UC18
+        UC19
+    end
+    
+    subgraph "Control de Multas"
+        UC20
+        UC21
+        UC22
+        UC23
+    end
+    
+    subgraph "Reportes y Estadísticas"
+        UC24
+        UC25
+        UC26
+        UC27
+        UC28
+    end
+    
+    subgraph "Administración del Sistema"
+        UC29
+        UC30
+        UC31
+    end
+    
+    %% Estilos para mejor visualización
+    style Socio fill:#e1f5ff,stroke:#333,stroke-width:2px
+    style Bibliotecario fill:#fff2cc,stroke:#333,stroke-width:2px
+    style Administrador fill:#f0e1ff,stroke:#333,stroke-width:2px
+    style Sistema fill:#ffffff,stroke:#333,stroke-width:3px
+```
+
+**Figura 5: Diagrama de Casos de Uso - Sistema de Gestión de Biblioteca**
+
+*Este diagrama muestra los actores del sistema (Socio, Bibliotecario, Administrador) y todas las funcionalidades (casos de uso) a las que tienen acceso, organizadas por módulos de funcionalidad. Incluye relaciones de inclusión (include) y extensión (extend) entre casos de uso.*
+
+### Descripción de Actores y sus Permisos:
+
+**1. Socio (Usuario Final)**
+- **Consultar Disponibilidad (UC04)**: Verificar si un libro está disponible para préstamo
+- **Búsqueda Avanzada (UC05)**: Buscar libros por título, autor, género, editorial
+- **Consultar Historial (UC09)**: Ver historial personal de préstamos
+- **Reservar Libro (UC16)**: Reservar un libro no disponible
+- **Cancelar Reserva (UC19)**: Cancelar una reserva activa
+
+**2. Bibliotecario (Operador Diario)**
+- **Todas las funcionalidades del Socio** más:
+- **Registrar Préstamo (UC11)**: Procesar préstamos de libros
+- **Registrar Devolución (UC12)**: Procesar devoluciones y calcular multas
+- **Renovar Préstamo (UC15)**: Renovar préstamos existentes (1 renovación permitida)
+- **Gestionar Lista de Espera (UC17)**: Administrar colas de reservas
+- **Registrar Pago de Multa (UC21)**: Registrar pagos en efectivo
+- **Reportes Básicos (UC24, UC25)**: Generar reportes de libros más prestados y socios más activos
+
+**3. Administrador (Superusuario)**
+- **Todas las funcionalidades** del sistema incluyendo:
+- **Gestión de Catálogo (UC01-UC03)**: Altas, bajas y modificaciones de libros
+- **Gestión de Socios (UC06-UC08)**: Mantenimiento completo de socios
+- **Gestión de Personal (UC29)**: Administrar bibliotecarios y técnicos
+- **Reportes Avanzados (UC26-UC28)**: Estadísticas detalladas y de inventario
+- **Mantenimiento del Sistema (UC30-UC31)**: Backup y restauración
+- **Configuración de Parámetros**: Gestionar reglas de negocio y constraints
+
+### Relaciones Clave:
+
+**Inclusiones (<<include>>):**
+- Registrar Préstamo incluye Validar Disponibilidad, Controlar Límite y Bloquear por Multas
+- Registrar Devolución incluye Calcular Multas Automáticamente
+- Reservar Libro incluye Consultar Disponibilidad
+
+**Extensiones (<<extend>>):**
+- Renovar Préstamo extiende Validar Disponibilidad
+- Cancelar Reserva extiende Gestionar Lista de Espera
+
+### Módulos de Funcionalidad:
+1. **Gestión de Catálogo**: Mantenimiento del inventario de libros
+2. **Gestión de Socios**: Administración de miembros de la biblioteca
+3. **Préstamos y Devoluciones**: Proceso principal de circulación
+4. **Sistema de Reservas**: Gestión de libros no disponibles
+5. **Control de Multas**: Cálculo y gestión de sanciones
+6. **Reportes y Estadísticas**: Análisis y generación de informes
+7. **Administración del Sistema**: Mantenimiento y configuración

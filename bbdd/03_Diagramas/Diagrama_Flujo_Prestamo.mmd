@@ -1,0 +1,90 @@
+flowchart TD
+    %% Diagrama de Flujo de Proceso - Préstamo de Libros
+    
+    %% Inicio del proceso
+    Start([Inicio: Solicitud de Préstamo]) --> A[Bibliotecario recibe solicitud]
+    
+    %% Validación de Socio
+    A --> B{¿Socio existe y está activo?}
+    B -->|No| C[Rechazar préstamo<br/>Socio inválido]
+    C --> End([Fin del Proceso])
+    
+    B -->|Sí| D{¿Socio tiene multas<br/>pendientes > 10€?}
+    D -->|Sí| E[Rechazar préstamo<br/>Multas pendientes]
+    E --> End
+    
+    D -->|No| F{¿Socio tiene menos<br/>de 3 préstamos activos?}
+    F -->|No| G[Rechazar préstamo<br/>Límite alcanzado]
+    G --> End
+    
+    %% Validación de Libro
+    F -->|Sí| H{¿Libro existe<br/>y está disponible?}
+    H -->|No| I[Rechazar préstamo<br/>Libro no disponible]
+    I --> End
+    
+    %% Proceso de Préstamo
+    H -->|Sí| J[Registrar préstamo en sistema]
+    J --> K[Asignar fecha de devolución<br/>(15 días desde hoy)]
+    L --> M[Actualizar stock del libro<br/>stock_disponible - 1]
+    
+    %% Actualización de estado
+    M --> N{¿stock_disponible = 0?}
+    N -->|Sí| O[Estado libro = 'Prestado']
+    N -->|No| P[Estado libro = 'Disponible']
+    
+    O --> Q[Generar comprobante de préstamo]
+    P --> Q
+    
+    %% Fin del proceso
+    Q --> R[Entregar libro al socio]
+    R --> End
+    
+    %% Subproceso para actualización de stock
+    L[Asignar personal bibliotecario] --> M
+    
+    %% Notas explicativas
+    style Start fill:#90EE90,stroke:#333,stroke-width:2px
+    style End fill:#FFB6C1,stroke:#333,stroke-width:2px
+    style C fill:#FFB6C1,stroke:#333,stroke-width:1px
+    style E fill:#FFB6C1,stroke:#333,stroke-width:1px
+    style G fill:#FFB6C1,stroke:#333,stroke-width:1px
+    style I fill:#FFB6C1,stroke:#333,stroke-width:1px
+    style Q fill:#90EE90,stroke:#333,stroke-width:1px
+    
+    %% Leyenda
+    subgraph "Leyenda"
+        direction LR
+        L1[Sí/No] --> L2[Decisiones]
+        L3[Procesos] --> L4[Operaciones]
+        L5[Inicio/Fin] --> L6[Eventos]
+    end
+```
+
+**Figura 4: Diagrama de Flujo de Procesos - Préstamo de Libros**
+
+*Este diagrama muestra el flujo completo del proceso de préstamo de libros, incluyendo todas las validaciones, decisiones y operaciones necesarias para registrar un préstamo exitosamente en el sistema de gestión de biblioteca.*
+
+### Descripción del Proceso:
+
+1. **Inicio**: El bibliotecario recibe una solicitud de préstamo de un socio
+2. **Validaciones de Socio**:
+   - Verificar existencia y estado activo del socio
+   - Comprobar multas pendientes (máximo permitido: 10€)
+   - Validar límite de préstamos (máximo 3 libros simultáneamente)
+3. **Validaciones de Libro**:
+   - Verificar existencia del libro en el catálogo
+   - Comprobar disponibilidad (stock_disponible > 0)
+4. **Registro del Préstamo**:
+   - Crear registro en tabla PRESTAMOS
+   - Asignar fecha de devolución (15 días naturales)
+   - Asociar bibliotecario que gestiona el préstamo
+5. **Actualización de Inventario**:
+   - Reducir stock_disponible en 1 unidad
+   - Actualizar estado del libro según disponibilidad
+6. **Finalización**: Generar comprobante y entregar el libro físico al socio
+
+### Reglas de Negocio Aplicadas:
+- **RN-01**: Máximo 3 libros por socio simultáneamente
+- **RN-02**: Período de préstamo: 15 días
+- **RN-04**: No se permiten préstamos a socios con multas > 10€
+- **RN-13**: Estados válidos para libros (Disponible, Prestado, Reservado, En reparación)

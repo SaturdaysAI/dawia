@@ -1,0 +1,136 @@
+erDiagram
+    %% Modelo Relacional - Tablas con columnas, tipos de datos y constraints detallados
+    
+    %% Tabla AUTORES
+    AUTORES {
+        INT autor_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        VARCHAR(50) nacionalidad "NULL"
+        DATE fecha_nacimiento "NULL"
+    }
+    
+    %% Tabla EDITORIALES
+    EDITORIALES {
+        INT editorial_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL, UNIQUE"
+        VARCHAR(50) pais "NULL"
+        TIMESTAMP fecha_registro "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+    }
+    
+    %% Tabla GENEROS
+    GENEROS {
+        INT genero_id PK "AUTO_INCREMENT"
+        VARCHAR(50) nombre "NOT NULL, UNIQUE"
+        TEXT descripcion "NULL"
+    }
+    
+    %% Tabla LIBROS
+    LIBROS {
+        VARCHAR(20) isbn PK "NOT NULL, UNIQUE"
+        VARCHAR(200) titulo "NOT NULL"
+        INT editorial_id FK "NOT NULL"
+        INT genero_id FK "NOT NULL"
+        INT anio_publicacion "NULL, CHECK >= 1000 AND <= YEAR(CURDATE())"
+        INT stock_total "NOT NULL, DEFAULT 1, CHECK >= 0"
+        INT stock_disponible "NOT NULL, DEFAULT 1, CHECK >= 0"
+        ENUM estado "NOT NULL, DEFAULT 'Disponible', CHECK IN ('Disponible', 'Prestado', 'Reservado', 'En reparación')"
+    }
+    
+    %% Tabla intermedia LIBRO_AUTOR (relación muchos a muchos)
+    LIBRO_AUTOR {
+        VARCHAR(20) isbn PK,FK "NOT NULL"
+        INT autor_id PK,FK "NOT NULL"
+    }
+    
+    %% Tabla SOCIOS
+    SOCIOS {
+        INT socio_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        VARCHAR(100) email "NOT NULL, UNIQUE"
+        VARCHAR(20) telefono "NULL"
+        DATE fecha_registro "NOT NULL, DEFAULT CURRENT_DATE"
+        ENUM estado "NOT NULL, DEFAULT 'Activo', CHECK IN ('Activo', 'Inactivo', 'Suspendido')"
+        DECIMAL(10,2) multa_acumulada "NOT NULL, DEFAULT 0.00, CHECK >= 0"
+    }
+    
+    %% Tabla PERSONAL
+    PERSONAL {
+        INT personal_id PK "AUTO_INCREMENT"
+        VARCHAR(100) nombre "NOT NULL"
+        VARCHAR(100) apellido "NOT NULL"
+        ENUM rol "NOT NULL, CHECK IN ('Bibliotecario', 'Administrador', 'Técnico')"
+        VARCHAR(100) email "NOT NULL, UNIQUE"
+        DATE fecha_contratacion "NOT NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Activo', CHECK IN ('Activo', 'Inactivo', 'Vacaciones')"
+    }
+    
+    %% Tabla PRESTAMOS
+    PRESTAMOS {
+        INT prestamo_id PK "AUTO_INCREMENT"
+        INT socio_id FK "NOT NULL"
+        VARCHAR(20) isbn FK "NOT NULL"
+        INT personal_id FK "NOT NULL"
+        DATE fecha_prestamo "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_devolucion "NOT NULL"
+        DATE fecha_devolucion_real "NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Activo', CHECK IN ('Activo', 'Devuelto', 'Vencido', 'Renovado')"
+    }
+    
+    %% Tabla RESERVAS
+    RESERVAS {
+        INT reserva_id PK "AUTO_INCREMENT"
+        INT socio_id FK "NOT NULL"
+        VARCHAR(20) isbn FK "NOT NULL"
+        DATE fecha_reserva "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_caducidad "NOT NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Pendiente', CHECK IN ('Pendiente', 'Disponible', 'Retirado', 'Caducado', 'Cancelado')"
+    }
+    
+    %% Tabla MULTAS
+    MULTAS {
+        INT multa_id PK "AUTO_INCREMENT"
+        INT prestamo_id FK "NOT NULL, UNIQUE"
+        DECIMAL(10,2) importe "NOT NULL, CHECK >= 0 AND <= 30.00"
+        DATE fecha_generacion "NOT NULL, DEFAULT CURRENT_DATE"
+        DATE fecha_pago "NULL"
+        ENUM estado "NOT NULL, DEFAULT 'Pendiente', CHECK IN ('Pendiente', 'Pagada')"
+    }
+    
+    %% Relaciones y Cardinalidades
+    EDITORIALES ||--o{ LIBROS : "publica (1:N)"
+    GENEROS ||--o{ LIBROS : "clasifica (1:N)"
+    LIBROS }o--o{ AUTORES : "escrito_por (N:M) via LIBRO_AUTOR"
+    SOCIOS }o--o{ LIBROS : "pide_prestado (N:M) via PRESTAMOS"
+    PERSONAL }o--o{ LIBROS : "gestiona_prestamos (N:M) via PRESTAMOS"
+    SOCIOS }o--o{ LIBROS : "reserva (N:M) via RESERVAS"
+    PRESTAMOS ||--o| MULTAS : "genera (1:0..1)"
+```
+
+**Figura 3: Modelo Relacional - Sistema de Gestión de Biblioteca**
+
+*Este modelo muestra todas las tablas con sus columnas, tipos de datos, claves primarias (PK), claves foráneas (FK), constraints CHECK, valores DEFAULT y las relaciones con sus cardinalidades específicas. Incluye la tabla intermedia LIBRO_AUTOR para la relación muchos a muchos entre libros y autores.*
+
+### Detalles de Implementación:
+
+**Constraints de Integridad Referencial:**
+- `LIBROS.editorial_id` → `EDITORIALES.editorial_id` (ON DELETE RESTRICT)
+- `LIBROS.genero_id` → `GENEROS.genero_id` (ON DELETE RESTRICT)
+- `LIBRO_AUTOR.isbn` → `LIBROS.isbn` (ON DELETE CASCADE)
+- `LIBRO_AUTOR.autor_id` → `AUTORES.autor_id` (ON DELETE CASCADE)
+- `PRESTAMOS.socio_id` → `SOCIOS.socio_id` (ON DELETE RESTRICT)
+- `PRESTAMOS.isbn` → `LIBROS.isbn` (ON DELETE RESTRICT)
+- `PRESTAMOS.personal_id` → `PERSONAL.personal_id` (ON DELETE RESTRICT)
+- `RESERVAS.socio_id` → `SOCIOS.socio_id` (ON DELETE CASCADE)
+- `RESERVAS.isbn` → `LIBROS.isbn` (ON DELETE CASCADE)
+- `MULTAS.prestamo_id` → `PRESTAMOS.prestamo_id` (ON DELETE CASCADE)
+
+**Índices Recomendados:**
+- `idx_libros_titulo` en `LIBROS(titulo)`
+- `idx_libros_estado` en `LIBROS(estado)`
+- `idx_socios_email` en `SOCIOS(email)`
+- `idx_prestamos_socio` en `PRESTAMOS(socio_id)`
+- `idx_prestamos_fechas` en `PRESTAMOS(fecha_prestamo, fecha_devolucion)`
+- `idx_reservas_estado` en `RESERVAS(estado)`
+- `idx_multas_estado` en `MULTAS(estado)`

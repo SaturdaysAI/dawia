@@ -1,0 +1,113 @@
+erDiagram
+    %% Entidades principales del sistema de biblioteca
+    AUTORES ||--o{ LIBRO_AUTOR : escribe
+    LIBROS ||--o{ LIBRO_AUTOR : es_escrito_por
+    EDITORIALES ||--o{ LIBROS : publica
+    GENEROS ||--o{ LIBROS : clasifica
+    LIBROS ||--o{ PRESTAMOS : es_prestado_en
+    SOCIOS ||--o{ PRESTAMOS : realiza
+    LIBROS ||--o{ RESERVAS : es_reservado_en
+    SOCIOS ||--o{ RESERVAS : solicita
+    PRESTAMOS ||--|| MULTAS : genera
+    PERSONAL ||--o{ PRESTAMOS : gestiona
+    
+    %% Entidad AUTORES - Representa a los autores de libros
+    AUTORES {
+        int autor_id PK
+        varchar nombre
+        varchar apellido
+        varchar nacionalidad
+        date fecha_nacimiento
+    }
+    
+    %% Entidad LIBROS - Representa los libros del catálogo
+    LIBROS {
+        varchar isbn PK
+        varchar titulo
+        int editorial_id FK
+        int genero_id FK
+        int anio_publicacion
+        int stock_total
+        int stock_disponible
+        varchar estado
+    }
+    
+    %% Entidad EDITORIALES - Representa las editoriales
+    EDITORIALES {
+        int editorial_id PK
+        varchar nombre
+        varchar pais
+    }
+    
+    %% Entidad GENEROS - Representa los géneros literarios
+    GENEROS {
+        int genero_id PK
+        varchar nombre
+        varchar descripcion
+    }
+    
+    %% Entidad SOCIOS - Representa los miembros de la biblioteca
+    SOCIOS {
+        int socio_id PK
+        varchar nombre
+        varchar apellido
+        varchar email
+        varchar telefono
+        date fecha_registro
+        varchar estado
+        decimal multa_acumulada
+    }
+    
+    %% Entidad PRESTAMOS - Representa los préstamos de libros
+    PRESTAMOS {
+        int prestamo_id PK
+        int socio_id FK
+        varchar isbn FK
+        int personal_id FK
+        date fecha_prestamo
+        date fecha_devolucion
+        date fecha_devolucion_real
+        varchar estado
+    }
+    
+    %% Entidad RESERVAS - Representa las reservas de libros
+    RESERVAS {
+        int reserva_id PK
+        int socio_id FK
+        varchar isbn FK
+        date fecha_reserva
+        date fecha_caducidad
+        varchar estado
+    }
+    
+    %% Entidad MULTAS - Representa las multas por retraso
+    MULTAS {
+        int multa_id PK
+        int prestamo_id FK
+        decimal importe
+        date fecha_generacion
+        date fecha_pago
+        varchar estado
+    }
+    
+    %% Entidad PERSONAL - Representa el personal bibliotecario
+    PERSONAL {
+        int personal_id PK
+        varchar nombre
+        varchar apellido
+        varchar rol
+        varchar email
+        date fecha_contratacion
+        varchar estado
+    }
+    
+    %% Tabla intermedia para relación muchos a muchos entre LIBROS y AUTORES
+    LIBRO_AUTOR {
+        varchar isbn PK,FK
+        int autor_id PK,FK
+    }
+```
+
+**Figura 1: Diagrama ER Conceptual - Sistema de Gestión de Biblioteca**
+
+*Este diagrama muestra las entidades principales, sus atributos clave y las relaciones entre ellas sin detalles técnicos de implementación.*
